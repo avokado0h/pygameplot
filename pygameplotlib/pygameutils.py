@@ -28,7 +28,7 @@ class py_handler():
 
         pygame.font.init()
 
-        self.font = pygame.font.SysFont('DejaVu Sans Mono', 30)
+        self.font = pygame.font.SysFont('DejaVu Sans Mono', 20)
         pygame.display.set_caption(caption)
         self.clock = pygame.time.Clock()
         self.c = colors()
@@ -44,8 +44,12 @@ class py_handler():
                     self.running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
-                if b.button.collidepoint(mouse_pos):
-                    b.state = not(b.state)
+                #if b != None:
+                try:
+                    if b.button.collidepoint(mouse_pos):
+                        b.state = not(b.state)
+                except:
+                    pass
 
     def py_update(self):
         self.check_input()
@@ -55,9 +59,11 @@ class py_handler():
         self.screen.fill(self.c.bg)
         return self.running
 
-class tbutton():
-    def __init__(self,a,width=50,height=10,x=0,y=0):
+class Button():
+    def __init__(self,a,text='button',width=50,height=10,x=0,y=0):
         self.a = a
+        self.font = a.font
+        self.text = text
         self.scr = self.a.screen
         self.w = width
         self.h = height
@@ -69,17 +75,16 @@ class tbutton():
 
     def check_button(self):
         self.a.check_input(self)
-        #pygame.draw.rect(self.scr,(255,255,255),self.button)
-        st = pygame.Surface((self.w,self.h))
-        st.fill(self.c.bg1)
-        if self.state == True:
-            sa = pygame.Surface((self.w/2,self.h))
-            sa.fill(self.c.red)
-            st.blit(sa,(0,0))
+        text = self.font.render(self.text,True,self.c.white)
+        th = text.get_height()
+        tw = text.get_width()
+        buttonBG = pygame.Surface((self.w,self.h+th))
+        buttonBG.fill(self.c.bg1)
         if self.state == False:
-            sa = pygame.Surface((self.w/2,self.h))
-            sa.fill(self.c.red)
-            st.blit(sa,(self.w/2,0))
-        self.scr.blit(st,(self.x,self.y))
+            pygame.draw.rect(buttonBG,self.c.red,(0,th,self.w/2,self.h))
+        if self.state == True:
+            pygame.draw.rect(buttonBG,self.c.red,(self.w/2,th,self.w/2,self.h))
+        self.scr.blit(buttonBG,(self.x,self.y-th))
+        self.scr.blit(text,((self.w-tw)/2+self.x,self.y-th))
         return self.state
 
