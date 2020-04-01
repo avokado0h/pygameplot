@@ -1,50 +1,53 @@
 import numpy as np
 from pygameplotlib.pygameplot import plotsurf as ps
 from pygameplotlib.pygameutils import py_handler as ph
-from pygameplotlib.pygameutils import tbutton
+from pygameplotlib.pygameutils import Button
 
-a = ph()
+a = ph(width=1000,height=730)
+
+f = 50.0
+T = 1/f
+fs = 40*f
+Ts = 1/fs
+
+t = np.arange(0,50*T,Ts)
 
 # create 4 plot objects
-signal_1 = ps(a.screen,670,220,xlabel='x[m]',ylabel='y(x)',xstep=5,xlim=[0,5])
-signal_2 = ps(a.screen,670,550,xlabel='x[m]',ylabel='y(x)',xstep=5)
-signal_3 = ps(a.screen,300,170,xstep=3)
+signal = ps(a.screen,500,350,xlabel='x[m]',ylabel='y(t)',xstep=5,xlim=[0,2*T])
+spectrum = ps(a.screen,500,350,xlabel='x[m]',ylabel='y(t)',xstep=6,xlim=[0,100])
 
-b1 = tbutton(a,width=200,height=50,x=750,y=10)
+b = Button(a,width=100,height=20,x=750,y=100)
 
-# create x vector
-x = np.linspace(-2*np.pi,2*np.pi,400)
-freq = 1.0
+def getSpectrum(timeSignal):
+    Y = np.fft.fft(y)
+    Y = np.abs(Y)
+    Y = Y[:len(Y)/2]
+    fspec = np.linspace(0,fs/2,len(Y))
+    return fspec,Y
 
 backward = True
 running = True
 b1state = True
 while running:
 
+    bState = b.check_button()
+
     # oscillate frequency between 1 and -1
-    if freq <= -1:
-        backward = not(backward)
-    if freq >= 1:
-        backward = not(backward)
-    if backward:   
-        freq -= 0.005
-    if not(backward):   
-        freq += 0.005
-    
+    if bState == True:
+        if f <= 40:
+            backward = False
+        if f >= 60:
+            backward = True
+        if backward:   
+            f -= 0.25
+        if not(backward):   
+            f += 0.25
+
     # update sine waves
-    y1 = 2.5*np.sin(2*np.pi*x)+2*np.sin(2*np.pi*0.5*freq*x)+5
-    y2 = 0.5*np.sin(2*np.pi*0.25*x)+2*np.sin(2*np.pi*freq*x)+3
-    y3 = 5*np.sin(2*np.pi*0.1*x)+2*np.sin(3*2*np.pi*freq*x)+3
+    y = np.sin(2*np.pi*f*t)
+    fspec,Y = getSpectrum(y)
 
-    # plot all graphs
-    if(b1state):
-        signal_1.plot(10,10,x,y2)
-        signal_2.plot(10,240,x,y1)
-        signal_3.plot(690,620,x,y3)
-    if(b1state == False):
-        signal_1.plot(10,10,x,y1)
-        signal_2.plot(10,240,x,y2)
-        signal_3.plot(690,620,x,y3)
+    signal.plot(10,10,t,y)
+    spectrum.plot(10,370,fspec,Y)
 
-    b1state = b1.check_button()
     running = a.py_update()
