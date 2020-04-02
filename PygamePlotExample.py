@@ -1,53 +1,58 @@
+
+    ######################
+   #  ExamplePygamePlot #
+  #  by -=avokado0h=-  #
+ ######################
+
 import numpy as np
-from pygameplotlib.pygameplot import plotsurf as ps
-from pygameplotlib.pygameutils import py_handler as ph
-from pygameplotlib.pygameutils import Button
+from pygameplotlib.PygamePlot import Plot as plt
+from pygameplotlib.PygameUtils import Settings
+from pygameplotlib.PygameUtils import showText
 
-a = ph(width=1000,height=730)
+a = Settings(width=1000,height=400)
 
-f = 50.0
+f = 40.0
 T = 1/f
 fs = 40*f
 Ts = 1/fs
 
-t = np.arange(0,50*T,Ts)
+t = np.arange(0,30*T,Ts)
 
 # create 4 plot objects
-signal = ps(a.screen,500,350,xlabel='x[m]',ylabel='y(t)',xstep=5,xlim=[0,2*T])
-spectrum = ps(a.screen,500,350,xlabel='x[m]',ylabel='y(t)',xstep=6,xlim=[0,100])
+signal = plt(a,500,350,xlabel='time [s]',ylabel='y(t)',
+        xstep=5,caption='Signal',xlim=[0,30*T])
+spectrum = plt(a,500,350,xlabel='frequency [Hz]',ylabel='|Y|',
+        xstep=5,xlim=[30,70],ylim=[0,600],caption='Spectrum')
+window = plt(a,350,350)
 
-b = Button(a,width=100,height=20,x=750,y=100)
+hamming = np.hanning(len(t))
 
-def getSpectrum(timeSignal):
-    Y = np.fft.fft(y)
+def getSpectrum(s):
+    s = s * hamming
+    s = np.append(s,np.zeros(len(s)*4))
+    Y = np.fft.fft(s)
     Y = np.abs(Y)
     Y = Y[:len(Y)/2]
     fspec = np.linspace(0,fs/2,len(Y))
     return fspec,Y
 
-backward = True
+d = 1
 running = True
-b1state = True
 while running:
 
-    bState = b.check_button()
+    if f <= 40:
+        d = 1
+    if f >= 60:
+        d = -1 
+    f += d*0.25 
 
-    # oscillate frequency between 1 and -1
-    if bState == True:
-        if f <= 40:
-            backward = False
-        if f >= 60:
-            backward = True
-        if backward:   
-            f -= 0.25
-        if not(backward):   
-            f += 0.25
-
-    # update sine waves
-    y = np.sin(2*np.pi*f*t)
+    y = np.sin(2*np.pi*50*t) + np.sin(2*np.pi*f*t)
     fspec,Y = getSpectrum(y)
 
-    signal.plot(10,10,t,y)
-    spectrum.plot(10,370,fspec,Y)
+    signal.Show(10,10,t,y,0,'green')
+    spectrum.Show(520,10,fspec,Y,0,'blue')
 
-    running = a.py_update()
+    signalTxt = 'y(t) = sin(2*pi*50Hz*t) + 2*sin(2*pi*{0:.2f}*t)'.format(f)
+    showText(a,150,365,signalTxt,30)
+
+    running = a.Update()
