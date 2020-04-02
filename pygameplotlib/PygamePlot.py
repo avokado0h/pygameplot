@@ -6,7 +6,7 @@
 
 import pygame
 import numpy as np
-from pygameutils import Colors
+from PygameUtils import Colors
 
 class Plot():
     def __init__(self,a,w,h,xlabel='',ylabel='',
