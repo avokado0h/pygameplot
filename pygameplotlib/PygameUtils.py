@@ -56,5 +56,6 @@ class Settings():
 
 def showText (a,x,y,text='',size=20):
         c = Colors()
-        txt = a.font.render(text,True,c.white)
+        font = pygame.font.SysFont('DejaVu Sans Mono', size)
+        txt = font.render(text,True,c.white)
         a.screen.blit(txt,(x,y))
