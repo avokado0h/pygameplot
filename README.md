@@ -10,7 +10,7 @@ To use the pygameplot module you need some python libraries.
 You can install them using pip
 
 ```
-pip install numpy
-pip install pygame
+$ pip install numpy
+$ pip install pygame
 ```
 
